@@ -1,5 +1,5 @@
 
-## 5. .gitignore
+## 4. .gitignore
 ```gitignore
 # Python
 __pycache__/
