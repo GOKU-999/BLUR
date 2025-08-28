@@ -4,7 +4,7 @@ A Streamlit application that uses the BRIA RMBG-1.4 model to segment images and 
 
 ## Features
 
-- Upload images (JPG, JPEG, PNG)
+- Upload images (JPG, JPEG, PNG, WEBP)
 - Adjust blur intensity with a slider
 - View original and processed images side-by-side
 - Download processed images
