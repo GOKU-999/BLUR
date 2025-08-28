@@ -1,7 +1,6 @@
 import streamlit as st
 import numpy as np
-import cv2
-from PIL import Image
+from PIL import Image, ImageFilter
 from transformers import pipeline
 import io
 
@@ -28,8 +27,9 @@ def gaussian_blur_app(image, sigma, pipe):
     original_image_np = np.array(image)
     mask = np.array(pillow_mask)
     
-    # Apply Gaussian blur to entire image
-    blurred_image = cv2.GaussianBlur(original_image_np, (0, 0), sigmaX=sigma, sigmaY=sigma)
+    # Apply Gaussian blur using PIL instead of OpenCV
+    blurred_image = image.filter(ImageFilter.GaussianBlur(radius=sigma))
+    blurred_image_np = np.array(blurred_image)
     
     # Convert 2D mask to 3D if necessary
     if len(mask.shape) == 2:
@@ -40,37 +40,41 @@ def gaussian_blur_app(image, sigma, pipe):
     mask_normalized = mask_3d / 255.0
     
     # Combine foreground and background
-    final_image = (mask_normalized * original_image_np + (1 - mask_normalized) * blurred_image).astype(np.uint8)
+    final_image = (mask_normalized * original_image_np + (1 - mask_normalized) * blurred_image_np).astype(np.uint8)
     
     return Image.fromarray(final_image)
 
 def main():
     st.set_page_config(page_title="Background Blur App", layout="wide")
     
-    st.title("Gaussian Blur App")
-    st.markdown("Upload an image and adjust the sigma value to blur the background while keeping the foreground sharp.")
+    st.title("🎨 Background Blur App")
+    st.markdown("Upload an image and adjust the blur intensity to create a professional-looking background blur effect.")
     
     # Initialize the model
     try:
         pipe = load_model()
+        st.sidebar.success("Model loaded successfully!")
     except Exception as e:
         st.error(f"Error loading model: {e}")
+        st.info("Please make sure all dependencies are installed correctly.")
         return
     
     # Sidebar for controls
     with st.sidebar:
-        st.header("Settings")
+        st.header("⚙️ Settings")
         sigma = st.slider(
-            "Blur Intensity (Sigma)",
+            "Blur Intensity",
             min_value=1.0,
             max_value=50.0,
-            value=5.0,
-            step=0.5
+            value=10.0,
+            step=1.0,
+            help="Higher values create more blur effect"
         )
         
         uploaded_file = st.file_uploader(
-            "Upload Image",
-            type=["jpg", "jpeg", "png", "webp"]
+            "📁 Upload Image",
+            type=["jpg", "jpeg", "png", "webp"],
+            help="Supported formats: JPG, JPEG, PNG, WEBP"
         )
     
     # Main content area
@@ -78,30 +82,35 @@ def main():
         col1, col2 = st.columns(2)
         
         with col1:
-            st.subheader("Original Image")
+            st.subheader("📸 Original Image")
             original_image = Image.open(uploaded_file)
             st.image(original_image, use_column_width=True)
+            st.caption(f"Original size: {original_image.size[0]}x{original_image.size[1]}")
         
         with col2:
-            st.subheader("Processed Image")
-            with st.spinner("Processing image..."):
+            st.subheader("✨ Processed Image")
+            with st.spinner("🔍 Processing image... This may take a few seconds"):
                 try:
                     result_image = gaussian_blur_app(original_image, sigma, pipe)
                     st.image(result_image, use_column_width=True)
+                    st.caption("Background blurred successfully!")
                     
                     # Download button for processed image
                     buf = io.BytesIO()
                     result_image.save(buf, format="PNG")
                     st.download_button(
-                        label="Download Processed Image",
+                        label="💾 Download Processed Image",
                         data=buf.getvalue(),
                         file_name="blurred_background.png",
-                        mime="image/png"
+                        mime="image/png",
+                        use_container_width=True
                     )
                 except Exception as e:
-                    st.error(f"Error processing image: {e}")
+                    st.error(f"❌ Error processing image: {e}")
+                    st.info("Please try with a different image or lower blur intensity.")
     else:
-        st.info("Please upload an image to get started")
+        st.info("👆 Please upload an image to get started!")
+        st.image("https://via.placeholder.com/600x400/3B82F6/FFFFFF?text=Upload+an+Image", use_column_width=True)
 
 if __name__ == "__main__":
     main()
