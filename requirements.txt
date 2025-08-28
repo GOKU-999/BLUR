@@ -1,9 +1,6 @@
 streamlit
 numpy
-opencv-python
 Pillow
 transformers
 torch
 torchvision
-scikit-image
-
