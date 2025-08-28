@@ -84,7 +84,7 @@ def main():
         with col1:
             st.subheader("📸 Original Image")
             original_image = Image.open(uploaded_file)
-            st.image(original_image, use_column_width=True)
+            st.image(original_image, use_container_width=True)
             st.caption(f"Original size: {original_image.size[0]}x{original_image.size[1]}")
         
         with col2:
@@ -92,7 +92,7 @@ def main():
             with st.spinner("🔍 Processing image... This may take a few seconds"):
                 try:
                     result_image = gaussian_blur_app(original_image, sigma, pipe)
-                    st.image(result_image, use_column_width=True)
+                    st.image(result_image, use_container_width=True)
                     st.caption("Background blurred successfully!")
                     
                     # Download button for processed image
@@ -110,7 +110,7 @@ def main():
                     st.info("Please try with a different image or lower blur intensity.")
     else:
         st.info("👆 Please upload an image to get started!")
-        st.image("https://via.placeholder.com/600x400/3B82F6/FFFFFF?text=Upload+an+Image", use_column_width=True)
+        st.image("https://via.placeholder.com/600x400/3B82F6/FFFFFF?text=Upload+an+Image", use_container_width=True)
 
 if __name__ == "__main__":
     main()
